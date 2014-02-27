@@ -72,8 +72,12 @@ class RailsEmailPreview::EmailsController < ::RailsEmailPreview::ApplicationCont
 
   def preview_mail(opt = {})
     RequestStore.store[:rep_edit_links] = true if opt[:edit_links]
-    mail = @preview_class.new.send(@mail_action)
-    mail
+    preview_mailer = if @preview_class.instance_method(:initialize).arity == 0
+      @preview_class.new
+    else
+      @preview_class.new(params)
+    end
+    preview_mailer.public_send(@mail_action)
   end
 
   def set_email_preview_locale
